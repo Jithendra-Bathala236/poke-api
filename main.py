@@ -21,9 +21,6 @@ def hello():
 
 @app.route('/pokemon/create', methods=['POST'])
 def createPokemon():
-    if request.method != 'POST':
-        return json.dumps({"Status": False, "Message": "url not found"}), 404
-    
     contentType = request.headers.get('Content-Type')
 
     if contentType != 'application/json':
@@ -33,12 +30,37 @@ def createPokemon():
             }), 400
 
     data = request.json
+    id = pokemonCollection.count_documents({}) + 1
+    data["id"] = id
+
     try:
         pokemonCollection.insert_one(data)
         return json.dumps({"Status": True, "Message": "Pokemon created successfully"}), 200
     except Exception as e:
         print(e)
         return json.dumps({"Status": False, "Message": "Unable to create Pokemon"}), 500
+
+@app.route('/pokemon', methods=['GET'])
+def deletePokemon():
+
+    id = request.args.get('id')
+
+    if (id == None):
+        pokemons = pokemonCollection.find({})
+        data = []
+        for pokemon in pokemons:
+            pokemon["_id"] = str(pokemon["_id"])
+            data.append(pokemon)
+        return json.dumps({"Status": True, "Pokemons" : data, "Count": len(data)})
+
+    pokemon = pokemonCollection.find_one({"id": int(id)})
+
+    if (pokemon):
+        pokemon["_id"] = str(pokemon["_id"])
+        return json.dumps({"Status": True, "Pokemon" : pokemon}), 200
+
+    return json.dumps({"Message": "Pokemon not found", "Status" : False}), 404
+
 
 
 if __name__ == '__main__':
