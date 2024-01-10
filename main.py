@@ -51,7 +51,7 @@ def getPokemon():
         for pokemon in pokemons:
             pokemon["_id"] = str(pokemon["_id"])
             data.append(pokemon)
-        return json.dumps({"Status": True, "Pokemons" : data, "Count": len(data)})
+        return json.dumps({"Status": True, "Pokemons" : data, "Count": len(data)}), 200
 
     pokemon = pokemonCollection.find_one({"id": int(id)})
 
@@ -61,6 +61,19 @@ def getPokemon():
 
     return json.dumps({"Message": "Pokemon not found", "Status" : False}), 404
 
+@app.route('/pokemon/delete', methods=['DELETE'])
+def deletePokemon():
+    id = request.args.get('id')
+
+    if (id == None):
+        return json.dumps({"Status": False, "Message": "Invalid Pokemon Id"}), 400
+
+    pokemon = pokemonCollection.delete_one({"id": int(id)})
+    
+    if (pokemon.deleted_count == 0):
+        return json.dumps({"Message": "Pokemon not found", "Status" : False}), 404
+    
+    return json.dumps({"Message": "Pokemon Deleted Successfully", "Status": True}), 200
 
 
 if __name__ == '__main__':
