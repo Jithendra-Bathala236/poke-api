@@ -41,7 +41,7 @@ def createPokemon():
         return json.dumps({"Status": False, "Message": "Unable to create Pokemon"}), 500
 
 @app.route('/pokemon', methods=['GET'])
-def deletePokemon():
+def getPokemon():
 
     id = request.args.get('id')
 
