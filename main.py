@@ -75,6 +75,26 @@ def deletePokemon():
     
     return json.dumps({"Message": "Pokemon Deleted Successfully", "Status": True}), 200
 
+@app.route("/pokemon/update", methods=['PUT'])
+def updatePokemon():
+    id = request.args.get('id')
+    updatedData = request.json
+    
+    contentType = request.headers.get('Content-Type')
+
+    if contentType != 'application/json':
+        return json.dumps({"Message" : "Content Types isn't supported", "status" : False}), 400
+
+
+    if (id == None):
+        return json.dumps({"Status": False, "Message": "Invalid Pokemon Id"}), 400
+
+    pokemon = pokemonCollection.update_one({"id": int(id)}, {"$set": updatedData})
+
+    if (pokemon.matched_count == 0):
+        return json.dumps({"Message": "Pokemon not found", "Status" : False}), 404
+    
+    return json.dumps({"Message": "Pokemon Updated Successfully", "Status": True}), 200
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
